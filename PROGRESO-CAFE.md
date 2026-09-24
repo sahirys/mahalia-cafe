@@ -2,7 +2,7 @@
 
 ## Clase 5 · De un prompt a una app publicada en Internet (tramo final)
 - [x] Etapa 0 · Punto de partida: llegaste a Claude Code
-- [ ] Etapa 1 · GitHub
+- [x] Etapa 1 · GitHub
 - [ ] Etapa 2 · Vercel — URL pública
 
 ## Clase 6 · Conectar con el mundo real
@@ -21,3 +21,4 @@ _(Lo importante para retomar. Sin claves ni contraseñas.)_
 - Proyecto base: React + Vite con e-commerce de café.
 - Proyecto abierto en VS Code y Claude Code listo para arrancar la Clase 5.
 - Etapa 0 confirmada: proyecto listo para seguir con GitHub.
+- Etapa 1 confirmada: repositorio remoto en GitHub conectado y funcionando.
