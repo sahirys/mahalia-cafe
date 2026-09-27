@@ -6,8 +6,9 @@ import MenuScreen from "./screens/MenuScreen.jsx";
 import CheckoutScreen from "./screens/CheckoutScreen.jsx";
 import ConfirmScreen from "./screens/ConfirmScreen.jsx";
 import { MAX_QTY, PRODUCTS_BY_ID } from "./data/products.js";
-import { countItems, makeOrderNumber, totalItems } from "./utils/format.js";
+import { countItems, totalItems } from "./utils/format.js";
 import { pickupLabel } from "./utils/pickup.js";
+import { registerOrder } from "./utils/orders.js";
 import { useLastOrder } from "./hooks/useLastOrder.js";
 
 // Flujo: carta → pedido y pago → confirmación.
@@ -21,10 +22,10 @@ export default function App() {
   const [toast, setToast] = useState("");
   const toastTimer = useRef();
 
-  const showToast = (msg) => {
+  const showToast = (msg, ms = 1800) => {
     setToast(msg);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(""), 1800);
+    toastTimer.current = setTimeout(() => setToast(""), ms);
   };
 
   const go = (next) => setScreen(next);
@@ -51,24 +52,23 @@ export default function App() {
     showToast("Tu último pedido está listo para pagar");
   };
 
-  // Pago SIMULADO: espera un segundo y confirma. Aquí se conectará la pasarela real.
-  const pay = () => {
+  // Pago todavía SIMULADO (la pasarela real llega después). La compra se
+  // confirma recién cuando el café la registró en el backend.
+  const pay = async () => {
     setPaying(true);
-    setTimeout(() => {
-      const name = checkout.name.trim();
-      setOrder({
-        number: makeOrderNumber(),
-        items: { ...cart },
-        total: totalItems(cart),
-        name,
-        pay: checkout.pay,
-        pickupLabel: pickupLabel(checkout.pickup),
-      });
+    const name = checkout.name.trim();
+    const pickup = pickupLabel(checkout.pickup);
+    try {
+      const { orderNumber, total } = await registerOrder({ items: cart, name, pay: checkout.pay, pickup });
+      setOrder({ number: orderNumber, items: { ...cart }, total, name, pay: checkout.pay, pickupLabel: pickup });
       saveLastOrder({ items: { ...cart }, name });
       setCart({});
-      setPaying(false);
       go("confirm");
-    }, 1100);
+    } catch (err) {
+      showToast(err.message, 4000);
+    } finally {
+      setPaying(false);
+    }
   };
 
   return (

@@ -12,6 +12,3 @@ export const itemsText = (items) =>
   Object.entries(items)
     .map(([id, q]) => `${q}× ${PRODUCTS_BY_ID[id].name}`)
     .join(" · ");
-
-// Número de pedido simulado. Más adelante lo generará el servidor.
-export const makeOrderNumber = () => "A-" + String(Math.floor(100 + Math.random() * 900));
