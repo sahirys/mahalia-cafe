@@ -29,7 +29,11 @@ export default function App() {
   };
 
   const go = (next) => setScreen(next);
-  useEffect(() => window.scrollTo(0, 0), [screen]);
+  // Con llaves: el efecto no debe devolver lo que devuelve scrollTo
+  // (en navegadores nuevos es una promesa y React la trataría como limpieza).
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [screen]);
 
   const addToCart = (id, qty) => {
     setCart((c) => ({ ...c, [id]: Math.min(MAX_QTY, (c[id] || 0) + qty) }));
