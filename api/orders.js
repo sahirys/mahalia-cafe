@@ -17,8 +17,9 @@ export default async function handler(req, res) {
   }
 
   const backendUrl = process.env.APPS_SCRIPT_URL;
-  if (!backendUrl) {
-    console.error("Falta la variable de entorno APPS_SCRIPT_URL en Vercel.");
+  const backendToken = process.env.APPS_SCRIPT_TOKEN;
+  if (!backendUrl || !backendToken) {
+    console.error("Falta APPS_SCRIPT_URL o APPS_SCRIPT_TOKEN en las variables de entorno de Vercel.");
     return res.status(500).json({ ok: false, error: "La tienda no está conectada con el café." });
   }
 
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await sendToBackend(backendUrl, { action: "registrarVenta", order });
+    const result = await sendToBackend(backendUrl, backendToken, { action: "registrarVenta", order });
     if (!result.ok) throw new Error(result.error || "El backend rechazó el pedido.");
     return res.status(200).json({ ok: true, orderNumber: order.orderId, total: order.total });
   } catch (err) {
@@ -77,12 +78,13 @@ function makeOrderId() {
 }
 
 // Envía el POST en JSON a Apps Script y devuelve su respuesta { ok, ... }.
-// Apps Script responde con una redirección que fetch sigue sola.
-async function sendToBackend(url, payload) {
+// El token viaja dentro del JSON porque Apps Script no puede leer los
+// encabezados HTTP. Apps Script responde con una redirección que fetch sigue sola.
+async function sendToBackend(url, token, payload) {
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, token }),
     signal: AbortSignal.timeout(BACKEND_TIMEOUT_MS),
   });
 
